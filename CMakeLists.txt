@@ -3,4 +3,5 @@ project(test_glfw)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(test_glfw main.cpp)
+add_subdirectory(GLFW)
+add_subdirectory(src)
