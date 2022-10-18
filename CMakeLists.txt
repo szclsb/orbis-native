@@ -4,4 +4,5 @@ project(test_glfw)
 set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(GLFW)
+add_subdirectory(GLAD)
 add_subdirectory(src)
