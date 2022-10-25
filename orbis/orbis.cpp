@@ -26,20 +26,17 @@ GLuint createShader(GLenum type) {
     return glCreateShader(type);
 }
 
-void compileShader(GLuint shader, const std::string& source, const ErrorCallback& errorCallback) {
-    int  success;
-    GLsizei infoLength;
-    char infoLog[512];
+GLuint compileShader(GLuint shader, const std::string& source, GLchar* errorLog, GLsizei errorLength) {
+    int success;
     auto source_ptr = source.c_str();
     glShaderSource(shader, 1, &source_ptr, nullptr);
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if(!success)
     {
-        glGetShaderInfoLog(shader, 512, &infoLength, infoLog);
-        std::string log(infoLog, infoLength);
-        errorCallback(log);
+        glGetShaderInfoLog(shader, errorLength, nullptr, errorLog);
     }
+    return success;
 }
 
 void deleteShader(GLuint shader) {
@@ -54,71 +51,69 @@ void attachShader(GLuint program, GLuint shader) {
     glAttachShader(program, shader);
 }
 
-void linkProgram(GLuint program, const ErrorCallback& errorCallback) {
+GLuint linkProgram(GLuint program, GLchar *errorLog, GLsizei errorLength) {
     int success;
-    GLsizei infoLength;
-    char infoLog[512];
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if(!success) {
-        glGetProgramInfoLog(program, 512, &infoLength, infoLog);
-        std::string log(infoLog, infoLength);
-        errorCallback(log);
+        glGetProgramInfoLog(program, errorLength, nullptr, errorLog);
     }
+    return success;
 }
 
 void useProgram(GLuint program) {
     glUseProgram(program);
 }
 
-GLuint createVao() {
+GLuint createVertexArray() {
     unsigned int vao;
     glCreateVertexArrays(1, &vao);
     return vao;
 }
 
-void bindVao(GLuint vao) {
+void bindVertexArray(GLuint vao) {
     glBindVertexArray(vao);
 }
 
-GLuint createVbo() {
+GLuint createBuffer() {
     unsigned int vbo;
     glCreateBuffers(1, &vbo);
     return vbo;
 }
 
-void bindVbo(GLuint vbo) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+void bindBuffer(GLenum target, GLuint vbo) {
+    glBindBuffer(target, vbo);
 }
 
-void fillVbo(float* vertices, size_t count, GLenum usage) {
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(vertices), vertices, usage);
+void bufferData(GLenum target, float* vertices, GLsizei count, GLenum usage) {
+    glBufferData(target, count * sizeof(vertices), vertices, usage);
 }
 
-void configVbo(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride) {
+void vertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride) {
     glVertexAttribPointer(index, size, type, normalized, stride, (void*)nullptr);
+}
+
+void enableVertexAttribArray(GLuint index) {
     glEnableVertexAttribArray(index);
+}
+
+void clear(GLbitfield mask) {
+    glClear(mask);
 }
 
 void drawArrays(GLenum mode, GLint first, GLsizei count) {
     glDrawArrays(mode, first, count);
 }
 
-void renderWindow(GLFWwindow* window, const RenderCallback& renderCallback) {
-    while (!glfwWindowShouldClose(window)) {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        renderCallback(0);  //fixme frame diff time
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
+int shouldWindowClose(GLFWwindow* window) {
+    return glfwWindowShouldClose(window);
 }
 
-void terminateWindows() {
+void renderWindow(GLFWwindow* window) {
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+}
+
+void shutDown() {
     glfwTerminate();
 }
