@@ -2,51 +2,73 @@
 
 using namespace std;
 
+namespace glfw = orbis::glfw;
+namespace gl = orbis::gl;
+
 int main() {
     // create window
-    GLFWwindow *window = createWindow(640, 480, "Hello World");
+    if (!glfw::init()) {
+        return -1;
+    }
+    GLFWwindow *window = glfw::createWindow(640, 480, "Hello World", nullptr, nullptr);
     if (!window) {
-        shutDown();
+        glfw::shutDown();
+        return -1;
+    }
+    glfw::makeContextCurrent(window);
+    if (!gl::load()) {
+        glfw::shutDown();
         return -1;
     }
 
     // create shaders
+    int success;
     auto *errorLog = new GLchar[512];
-    auto vertexShader = createShader(GL_VERTEX_SHADER);
-    if (!compileShader(vertexShader, "#version 450 core\n"
-                                "layout (location = 0) in vec3 aPos;\n"
-                                "void main()\n"
-                                "{\n"
-                                "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                "}", errorLog, 512)) {
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED:\n" << errorLog << std::endl;
-        shutDown();
+    auto vertexShader = gl::createShader(GL_VERTEX_SHADER);
+    gl::shaderSource(vertexShader, 1, "#version 450 core\n"
+                                      "layout (location = 0) in vec3 aPos;\n"
+                                      "void main()\n"
+                                      "{\n"
+                                      "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                      "}", nullptr);
+    gl::compileShader(vertexShader);
+    gl::getShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        gl::getShaderInfoLog(vertexShader, 512, nullptr, errorLog);
+        cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED:" << endl << errorLog << endl;
+        glfw::shutDown();
         return -1;
     }
-    auto fragmentShader = createShader(GL_FRAGMENT_SHADER);
-    if (!compileShader(fragmentShader, "#version 450 core\n"
+    auto fragmentShader = gl::createShader(GL_FRAGMENT_SHADER);
+    gl::shaderSource(fragmentShader, 1,  "#version 450 core\n"
                                       "out vec4 FragColor;\n"
                                       "void main()\n"
                                       "{\n"
                                       "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-                                      "}", errorLog, 512)) {
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED:\n" << errorLog<< std::endl;
-        shutDown();
+                                      "}", nullptr);
+    gl::compileShader(fragmentShader);
+    gl::getShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        gl::getShaderInfoLog(fragmentShader, 512, nullptr, errorLog);
+        cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED:" << endl << errorLog<< endl;
+        glfw::shutDown();
         return -1;
     }
 
     // create shader program
-    auto program = createProgram();
-    attachShader(program, vertexShader);
-    attachShader(program, fragmentShader);
-    auto linkSuccess = linkProgram(program, errorLog, 512);
-    deleteShader(vertexShader);
-    deleteShader(fragmentShader);
-    if (!linkSuccess) {
-        std::cout << "ERROR::PROGRAM::LINKING_FAILED:\n" << errorLog << std::endl;
-        shutDown();
+    auto program = gl::createProgram();
+    gl::attachShader(program, vertexShader);
+    gl::attachShader(program, fragmentShader);
+    gl::linkProgram(program);
+    gl::getProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        gl::getProgramInfoLog(program, 512, nullptr, errorLog);
+        cout << "ERROR::PROGRAM::LINKING_FAILED:" << endl << errorLog << endl;
+        glfw::shutDown();
         return -1;
     }
+    gl::deleteShader(vertexShader);
+    gl::deleteShader(fragmentShader);
 
     float vertices[] = {
             -0.5f, -0.5f, 0.0f,
@@ -55,25 +77,29 @@ int main() {
     };
 
     // create buffers
-    auto vao = createVertexArray();
-    bindVertexArray(vao);
-    auto vbo = createBuffer();
-    bindBuffer(GL_ARRAY_BUFFER, vbo);
-    bufferData(GL_ARRAY_BUFFER, vertices, 9, GL_STATIC_DRAW);
-    vertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
-    enableVertexAttribArray(0);
+    GLuint vao;
+    gl::createVertexArrays(1, &vao);
+    gl::bindVertexArray(vao);
+    GLuint vbo;
+    gl::createBuffers(1, &vbo);
+    gl::bindBuffer(GL_ARRAY_BUFFER, vbo);
+    gl::bufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    auto vertexSize = 3;
+    gl::vertexAttribPointer(0, vertexSize, GL_FLOAT, GL_FALSE, vertexSize * sizeof(float), nullptr);
+    gl::enableVertexAttribArray(0);
 
     // render
-    while (!shouldWindowClose(window)) {
-        clear(GL_COLOR_BUFFER_BIT);
+    while (!glfw::windowShouldClose(window)) {
+        gl::clear(GL_COLOR_BUFFER_BIT);
 
-        useProgram(program);
-        bindVertexArray(vao);
-        drawArrays(GL_TRIANGLES, 0, 3);
+        gl::useProgram(program);
+        gl::bindVertexArray(vao);
+        gl::drawArrays(GL_TRIANGLES, 0, 3);
 
-        renderWindow(window);
+        glfw::swapBuffers(window);
+        glfw::pollEvents();
     }
 
-    shutDown();
+    glfw::shutDown();
     return 0;
 }
