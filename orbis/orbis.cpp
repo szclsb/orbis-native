@@ -26,10 +26,9 @@ GLuint createShader(GLenum type) {
     return glCreateShader(type);
 }
 
-GLuint compileShader(GLuint shader, const std::string& source, GLchar* errorLog, GLsizei errorLength) {
+GLuint compileShader(GLuint shader, const GLchar *source, GLchar* errorLog, GLsizei errorLength) {
     int success;
-    auto source_ptr = source.c_str();
-    glShaderSource(shader, 1, &source_ptr, nullptr);
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if(!success)

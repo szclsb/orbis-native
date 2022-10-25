@@ -14,7 +14,7 @@
 extern "C" {
 ORBIS_API GLFWwindow* createWindow(int width, int height, const std::string& title);
 ORBIS_API GLuint createShader(GLenum type);
-ORBIS_API GLuint compileShader(GLuint shader, const std::string& source, GLchar *errorLog, GLsizei errorLength);
+ORBIS_API GLuint compileShader(GLuint shader, const GLchar* source, GLchar *errorLog, GLsizei errorLength);
 ORBIS_API void deleteShader(GLuint shader);
 ORBIS_API GLuint createProgram();
 ORBIS_API void attachShader(GLuint program, GLuint shader);
