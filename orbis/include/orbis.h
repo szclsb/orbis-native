@@ -12,7 +12,7 @@
 #endif
 
 extern "C" {
-ORBIS_API GLFWwindow* createWindow(int width, int height, const std::string& title);
+ORBIS_API GLFWwindow* createWindow(int width, int height, const char* title);
 ORBIS_API GLuint createShader(GLenum type);
 ORBIS_API GLuint compileShader(GLuint shader, const GLchar* source, GLchar *errorLog, GLsizei errorLength);
 ORBIS_API void deleteShader(GLuint shader);
