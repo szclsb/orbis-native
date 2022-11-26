@@ -1,4 +1,4 @@
-#include "./include/orbis.h"
+#include "include/orbis.h"
 
 ////////////////
 ///// GLFW /////
