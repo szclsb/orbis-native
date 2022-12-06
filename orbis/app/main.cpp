@@ -1,9 +1,11 @@
 #include "orbis.h"
+#include "orbismath.h"
 
 using namespace std;
 
 namespace glfw = orbis::glfw;
 namespace gl = orbis::gl;
+namespace om = orbis::math;
 
 int main() {
     // create window
@@ -20,6 +22,13 @@ int main() {
         glfw::shutDown();
         return -1;
     }
+
+    cout << "vec2: " << sizeof(om::Vec2f) << endl;
+    cout << "vec3: " << sizeof(om::Vec3f) << endl;
+    cout << "vec4: " << sizeof(om::Vec4f) << endl;
+    cout << "mat2: " << sizeof(om::Mat2f) << endl;
+    cout << "mat3: " << sizeof(om::Mat3f) << endl;
+    cout << "mat4: " << sizeof(om::Mat4f) << endl;
 
     // create shaders
     int success;
